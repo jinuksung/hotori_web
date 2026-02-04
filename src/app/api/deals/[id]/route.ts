@@ -4,9 +4,10 @@ import { getDealDetail } from "@/lib/queries"
 
 export async function GET(
   _request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const dealId = Number(params.id)
+  const { id } = await params
+  const dealId = Number(id)
   if (!Number.isFinite(dealId)) {
     return NextResponse.json({ error: "Invalid deal id" }, { status: 400 })
   }
