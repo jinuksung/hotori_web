@@ -1,3 +1,7 @@
+"use client"
+
+import * as React from "react"
+
 import { cn } from "@/lib/utils"
 
 type DealThumbnailProps = {
@@ -5,9 +9,32 @@ type DealThumbnailProps = {
   alt: string
   soldOut: boolean
   className?: string
+  fallbackSrc?: string
 }
 
-export function DealThumbnail({ src, alt, soldOut, className }: DealThumbnailProps) {
+function normalizeSrc(src: string, fallback: string) {
+  if (!src) return fallback
+  if (src.startsWith("http://") || src.startsWith("https://")) return src
+  if (src.startsWith("//")) return `https:${src}`
+  if (src.startsWith("/") || src.startsWith("data:")) return src
+  return fallback
+}
+
+export function DealThumbnail({
+  src,
+  alt,
+  soldOut,
+  className,
+  fallbackSrc = "/images/noImage.svg",
+}: DealThumbnailProps) {
+  const [currentSrc, setCurrentSrc] = React.useState(() =>
+    normalizeSrc(src, fallbackSrc)
+  )
+
+  React.useEffect(() => {
+    setCurrentSrc(normalizeSrc(src, fallbackSrc))
+  }, [src, fallbackSrc])
+
   return (
     <div
       className={cn(
@@ -18,13 +45,18 @@ export function DealThumbnail({ src, alt, soldOut, className }: DealThumbnailPro
       {/* Use <img> to avoid Next remotePatterns friction for external thumbnails in early MVP. */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src={src}
+        src={currentSrc}
         alt={alt}
         className={cn(
           "h-full w-full object-cover",
           soldOut ? "scale-[1.02] saturate-50" : "saturate-110"
         )}
         loading="lazy"
+        onError={() => {
+          if (currentSrc !== fallbackSrc) {
+            setCurrentSrc(fallbackSrc)
+          }
+        }}
       />
 
       {soldOut ? (
