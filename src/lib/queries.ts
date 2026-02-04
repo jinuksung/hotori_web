@@ -96,7 +96,9 @@ export async function listDeals(filters: DealListFilters): Promise<DealListItem[
   }
 
   if (typeof filters.soldOut === "boolean") {
-    query = query.eq("sold_out", filters.soldOut)
+    if (filters.soldOut) {
+      query = query.eq("sold_out", false)
+    }
   }
 
   if (filters.source) {

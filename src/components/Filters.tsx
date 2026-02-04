@@ -143,7 +143,7 @@ export function Filters({ categories, sources, className }: FiltersProps) {
           checked={soldOut}
           onCheckedChange={(checked) => update({ soldOut: Boolean(checked) })}
         />
-        <span>Sold out</span>
+        <span>Sold out 제외</span>
       </label>
 
       <Button
