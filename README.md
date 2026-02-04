@@ -18,8 +18,8 @@ cp .env.example .env.local
 `.env.local`:
 
 ```bash
-NEXT_PUBLIC_SUPABASE_URL=...
-NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+SUPABASE_URL=...
+SUPABASE_ANON_KEY=...
 ```
 
 2. 실행
@@ -37,4 +37,3 @@ npm run dev
 ## Assets
 
 - 로고/플레이스홀더 SVG: `public/images`
-

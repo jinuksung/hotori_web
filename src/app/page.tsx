@@ -1,10 +1,11 @@
+import { headers } from "next/headers"
+
 import { Header } from "@/components/Header"
 import { DealCard } from "@/components/DealCard"
 import { DealTable } from "@/components/DealTable"
 import { NoResults } from "@/components/NoResults"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { listCategories, listDeals } from "@/lib/queries"
-import type { Category, DealListFilters, DealListItem, DealSortKey } from "@/types/hotori"
+import type { Category, DealListItem, DealSortKey } from "@/types/hotori"
 
 function getString(
   searchParams: Record<string, string | string[] | undefined>,
@@ -20,6 +21,14 @@ function parseSort(value: string | null): DealSortKey {
   return "latest"
 }
 
+function getBaseUrl() {
+  const headerList = headers()
+  const host =
+    headerList.get("x-forwarded-host") ?? headerList.get("host") ?? "localhost:3000"
+  const proto = headerList.get("x-forwarded-proto") ?? "http"
+  return `${proto}://${host}`
+}
+
 export default async function Home({
   searchParams,
 }: {
@@ -27,28 +36,38 @@ export default async function Home({
 }) {
   const resolvedSearchParams = await searchParams
 
-  const filters: DealListFilters = {
-    query: getString(resolvedSearchParams, "q") ?? undefined,
-    source: getString(resolvedSearchParams, "source") ?? undefined,
-    categoryId: (() => {
-      const raw = getString(resolvedSearchParams, "categoryId")
-      if (!raw) return undefined
-      const parsed = Number(raw)
-      return Number.isFinite(parsed) ? parsed : undefined
-    })(),
-    soldOut: (() => {
-      const raw = getString(resolvedSearchParams, "soldOut")
-      if (!raw) return undefined
-      return raw === "1" || raw === "true"
-    })(),
-    sort: parseSort(getString(resolvedSearchParams, "sort")),
-  }
+  const queryParams = new URLSearchParams()
+  const query = getString(resolvedSearchParams, "q")
+  const source = getString(resolvedSearchParams, "source")
+  const categoryId = getString(resolvedSearchParams, "categoryId")
+  const soldOut = getString(resolvedSearchParams, "soldOut")
+  const sort = parseSort(getString(resolvedSearchParams, "sort"))
+
+  if (query) queryParams.set("q", query)
+  if (source) queryParams.set("source", source)
+  if (categoryId) queryParams.set("categoryId", categoryId)
+  if (soldOut) queryParams.set("soldOut", soldOut)
+  if (sort && sort !== "latest") queryParams.set("sort", sort)
 
   let categories: Category[] = []
   let deals: DealListItem[] = []
   let errorMessage: string | null = null
   try {
-    ;[categories, deals] = await Promise.all([listCategories(), listDeals(filters)])
+    const baseUrl = getBaseUrl()
+    const [categoriesRes, dealsRes] = await Promise.all([
+      fetch(`${baseUrl}/api/categories`, { cache: "no-store" }),
+      fetch(`${baseUrl}/api/deals?${queryParams.toString()}`, { cache: "no-store" }),
+    ])
+
+    if (!categoriesRes.ok) {
+      throw new Error(`Failed to load categories: ${categoriesRes.status}`)
+    }
+    if (!dealsRes.ok) {
+      throw new Error(`Failed to load deals: ${dealsRes.status}`)
+    }
+
+    categories = (await categoriesRes.json()) as Category[]
+    deals = (await dealsRes.json()) as DealListItem[]
   } catch (err) {
     errorMessage = err instanceof Error ? err.message : String(err)
   }
@@ -87,7 +106,7 @@ export default async function Home({
             </CardHeader>
             <CardContent className="text-sm text-muted-foreground">
               <div className="mb-2">
-                `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` 설정을
+                `SUPABASE_URL`, `SUPABASE_ANON_KEY` 설정을
                 확인해 주세요.
               </div>
               <pre className="whitespace-pre-wrap rounded-md border bg-background/50 p-3 text-xs text-foreground/80">

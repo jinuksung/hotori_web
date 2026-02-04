@@ -1,10 +1,16 @@
-import Link from "next/link"
-import { format } from "date-fns"
-import { ExternalLink, MessageSquare, ThumbsUp, Eye, Flame } from "lucide-react"
+import Link from "next/link";
+import { format } from "date-fns";
+import {
+  ExternalLink,
+  MessageSquare,
+  ThumbsUp,
+  Eye,
+  Flame,
+} from "lucide-react";
 
-import { DealThumbnail } from "@/components/DealThumbnail"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { DealThumbnail } from "@/components/DealThumbnail";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -13,35 +19,33 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { cn } from "@/lib/utils"
-import type { DealListItem } from "@/types/hotori"
+} from "@/components/ui/table";
+import { cn } from "@/lib/utils";
+import type { DealListItem } from "@/types/hotori";
 
-const FALLBACK_THUMB = "/images/noImage.svg"
+const FALLBACK_THUMB = "/images/noImage.svg";
 
 function formatDate(value: string) {
   // Supabase timestamptz -> ISO string.
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return value
-  return format(date, "yyyy-MM-dd HH:mm")
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return format(date, "yyyy-MM-dd HH:mm");
 }
 
 function formatNumber(value: number | null | undefined) {
-  if (value === null || value === undefined) return "-"
-  return value.toLocaleString()
+  if (value === null || value === undefined) return "-";
+  return value.toLocaleString();
 }
 
 type DealTableProps = {
-  deals: DealListItem[]
-}
+  deals: DealListItem[];
+};
 
 export function DealTable({ deals }: DealTableProps) {
   return (
     <div className="overflow-hidden rounded-md border border-border bg-card">
       <Table className="w-full table-fixed text-xs">
-        <TableCaption className="sr-only">
-          Hotori deals table
-        </TableCaption>
+        <TableCaption className="sr-only">Hotori deals table</TableCaption>
         <TableHeader className="bg-muted/60">
           <TableRow className="hover:bg-transparent">
             <TableHead className="w-[72px] px-2 text-[11px] font-medium text-muted-foreground">
@@ -66,18 +70,19 @@ export function DealTable({ deals }: DealTableProps) {
         </TableHeader>
         <TableBody>
           {deals.map((deal) => {
-            const source = deal.source
-            const thumb = deal.thumbnail_url ?? source?.thumb_url ?? FALLBACK_THUMB
-            const buy = deal.buy_link?.url ?? null
-            const original = source?.post_url ?? null
-            const isHot = (deal.metrics?.votes ?? 0) >= 100
+            const source = deal.source;
+            const thumb =
+              deal.thumbnail_url ?? source?.thumb_url ?? FALLBACK_THUMB;
+            const buy = deal.buy_link?.url ?? null;
+            const original = source?.post_url ?? null;
+            const isHot = (deal.metrics?.votes ?? 0) >= 100;
 
             return (
               <TableRow
                 key={deal.id}
                 className={cn(
                   "align-top hover:bg-muted/40",
-                  deal.sold_out && "bg-muted/30 opacity-70"
+                  deal.sold_out && "bg-muted/30 opacity-70",
                 )}
               >
                 <TableCell className="px-2 py-2.5">
@@ -97,20 +102,23 @@ export function DealTable({ deals }: DealTableProps) {
                           HOT
                         </span>
                       ) : null}
-                        <Link
-                          href={`/deals/${deal.id}`}
-                          className={cn(
-                            "line-clamp-2 text-[13px] font-medium leading-5 text-foreground hover:underline",
-                            deal.sold_out && "line-through decoration-muted-foreground"
-                          )}
-                        >
-                          {deal.title}
-                        </Link>
+                      <Link
+                        href={`/deals/${deal.id}`}
+                        className={cn(
+                          "line-clamp-2 text-[13px] font-medium leading-5 text-foreground hover:underline",
+                          deal.sold_out &&
+                            "line-through decoration-muted-foreground",
+                        )}
+                      >
+                        {deal.title}
+                      </Link>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
                       {deal.shop_name ? (
-                        <span className="text-foreground/80">{deal.shop_name}</span>
+                        <span className="text-foreground/80">
+                          {deal.shop_name}
+                        </span>
                       ) : null}
                       {deal.price ? (
                         <span className="text-[12px] font-semibold text-brand-accent">
@@ -118,7 +126,9 @@ export function DealTable({ deals }: DealTableProps) {
                         </span>
                       ) : null}
                       <span>{deal.shipping_type}</span>
-                      <span className="opacity-70">{formatDate(deal.created_at)}</span>
+                      <span className="opacity-70">
+                        {formatDate(deal.created_at)}
+                      </span>
                     </div>
                   </div>
                 </TableCell>
@@ -139,7 +149,7 @@ export function DealTable({ deals }: DealTableProps) {
                       >
                         {source.source}
                       </Badge>
-                      <span className="text-[10px] text-muted-foreground">post</span>
+                      {/* <span className="text-[10px] text-muted-foreground">post</span> */}
                     </div>
                   ) : (
                     <span className="text-sm text-muted-foreground">-</span>
@@ -200,7 +210,7 @@ export function DealTable({ deals }: DealTableProps) {
                         "h-6 px-2.5 text-[10px] font-medium",
                         buy
                           ? "bg-brand-accent text-white hover:bg-brand-accent-hover"
-                          : "bg-muted text-muted-foreground"
+                          : "bg-muted text-muted-foreground",
                       )}
                       disabled={!buy}
                     >
@@ -216,10 +226,10 @@ export function DealTable({ deals }: DealTableProps) {
                   </div>
                 </TableCell>
               </TableRow>
-            )
+            );
           })}
         </TableBody>
       </Table>
     </div>
-  )
+  );
 }

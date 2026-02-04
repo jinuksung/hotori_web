@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { headers } from "next/headers"
 import { notFound } from "next/navigation"
 import { format } from "date-fns"
 import {
@@ -16,7 +17,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import { getDealDetail } from "@/lib/queries"
+import type { DealDetail } from "@/types/hotori"
 
 const FALLBACK_THUMB = "/images/noImage.svg"
 
@@ -31,6 +32,14 @@ function formatNumber(value: number | null | undefined) {
   return value.toLocaleString()
 }
 
+function getBaseUrl() {
+  const headerList = headers()
+  const host =
+    headerList.get("x-forwarded-host") ?? headerList.get("host") ?? "localhost:3000"
+  const proto = headerList.get("x-forwarded-proto") ?? "http"
+  return `${proto}://${host}`
+}
+
 export default async function DealDetailPage({
   params,
 }: {
@@ -40,8 +49,14 @@ export default async function DealDetailPage({
   const dealId = Number(id)
   if (!Number.isFinite(dealId)) notFound()
 
-  const deal = await getDealDetail(dealId)
-  if (!deal) notFound()
+  const baseUrl = getBaseUrl()
+  const res = await fetch(`${baseUrl}/api/deals/${dealId}`, { cache: "no-store" })
+  if (res.status === 404) notFound()
+  if (!res.ok) {
+    throw new Error(`Failed to load deal: ${res.status}`)
+  }
+
+  const deal = (await res.json()) as DealDetail
 
   const primarySource = deal.sources[0] ?? null
   const thumb = deal.thumbnail_url ?? primarySource?.thumb_url ?? FALLBACK_THUMB
