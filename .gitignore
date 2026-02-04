@@ -23,6 +23,8 @@
 # misc
 .DS_Store
 *.pem
+.codex
+hot-deal-aggregator-ui
 
 # debug
 npm-debug.log*
