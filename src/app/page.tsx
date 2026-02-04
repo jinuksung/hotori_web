@@ -21,8 +21,8 @@ function parseSort(value: string | null): DealSortKey {
   return "latest"
 }
 
-function getBaseUrl() {
-  const headerList = headers()
+async function getBaseUrl() {
+  const headerList = await headers()
   const host =
     headerList.get("x-forwarded-host") ?? headerList.get("host") ?? "localhost:3000"
   const proto = headerList.get("x-forwarded-proto") ?? "http"
@@ -53,7 +53,7 @@ export default async function Home({
   let deals: DealListItem[] = []
   let errorMessage: string | null = null
   try {
-    const baseUrl = getBaseUrl()
+    const baseUrl = await getBaseUrl()
     const [categoriesRes, dealsRes] = await Promise.all([
       fetch(`${baseUrl}/api/categories`, { cache: "no-store" }),
       fetch(`${baseUrl}/api/deals?${queryParams.toString()}`, { cache: "no-store" }),

@@ -32,8 +32,8 @@ function formatNumber(value: number | null | undefined) {
   return value.toLocaleString()
 }
 
-function getBaseUrl() {
-  const headerList = headers()
+async function getBaseUrl() {
+  const headerList = await headers()
   const host =
     headerList.get("x-forwarded-host") ?? headerList.get("host") ?? "localhost:3000"
   const proto = headerList.get("x-forwarded-proto") ?? "http"
@@ -49,7 +49,7 @@ export default async function DealDetailPage({
   const dealId = Number(id)
   if (!Number.isFinite(dealId)) notFound()
 
-  const baseUrl = getBaseUrl()
+  const baseUrl = await getBaseUrl()
   const res = await fetch(`${baseUrl}/api/deals/${dealId}`, { cache: "no-store" })
   if (res.status === 404) notFound()
   if (!res.ok) {
