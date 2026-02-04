@@ -26,13 +26,8 @@ export function Header({ categories, sources, className }: HeaderProps) {
                 priority
               />
             </div>
-            <div className="leading-none">
-              <div className="text-sm font-semibold tracking-tight text-white">
-                Hotori
-              </div>
-              <div className="text-[10px] text-white/60">
-                핫딜 감별하는 다람쥐
-              </div>
+            <div className="text-sm font-semibold tracking-tight text-white">
+              Hotori
             </div>
           </Link>
           <div className="hidden items-center gap-2 text-[11px] text-white/60 md:flex">
