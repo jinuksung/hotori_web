@@ -1,65 +1,115 @@
-import Image from "next/image";
+import { Header } from "@/components/Header"
+import { DealCard } from "@/components/DealCard"
+import { DealTable } from "@/components/DealTable"
+import { NoResults } from "@/components/NoResults"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { listCategories, listDeals } from "@/lib/queries"
+import type { Category, DealListFilters, DealListItem, DealSortKey } from "@/types/hotori"
 
-export default function Home() {
+function getString(
+  searchParams: Record<string, string | string[] | undefined>,
+  key: string
+) {
+  const value = searchParams[key]
+  if (!value) return null
+  return Array.isArray(value) ? value[0] ?? null : value
+}
+
+function parseSort(value: string | null): DealSortKey {
+  if (value === "views" || value === "votes" || value === "comments") return value
+  return "latest"
+}
+
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}) {
+  const resolvedSearchParams = await searchParams
+
+  const filters: DealListFilters = {
+    query: getString(resolvedSearchParams, "q") ?? undefined,
+    source: getString(resolvedSearchParams, "source") ?? undefined,
+    categoryId: (() => {
+      const raw = getString(resolvedSearchParams, "categoryId")
+      if (!raw) return undefined
+      const parsed = Number(raw)
+      return Number.isFinite(parsed) ? parsed : undefined
+    })(),
+    soldOut: (() => {
+      const raw = getString(resolvedSearchParams, "soldOut")
+      if (!raw) return undefined
+      return raw === "1" || raw === "true"
+    })(),
+    sort: parseSort(getString(resolvedSearchParams, "sort")),
+  }
+
+  let categories: Category[] = []
+  let deals: DealListItem[] = []
+  let errorMessage: string | null = null
+  try {
+    ;[categories, deals] = await Promise.all([listCategories(), listDeals(filters)])
+  } catch (err) {
+    errorMessage = err instanceof Error ? err.message : String(err)
+  }
+
+  const sources = Array.from(
+    new Set(
+      deals
+        .map((d) => d.source?.source)
+        .filter((v): v is string => typeof v === "string" && v.length > 0)
+    )
+  ).sort()
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="min-h-dvh">
+      <Header categories={categories} sources={sources} />
+
+      <main className="mx-auto max-w-6xl px-4 py-6">
+        <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h1 className="text-base font-semibold tracking-tight">핫딜 목록</h1>
+            <p className="mt-1 text-xs text-muted-foreground">
+              데스크탑은 테이블, 모바일은 카드로 보여줘요.
+            </p>
+          </div>
+          <div className="text-xs text-muted-foreground">
+            <span className="rounded-full border bg-muted/40 px-3 py-1">
+              {deals.length.toLocaleString()} items
+            </span>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+
+        {errorMessage ? (
+          <Card className="bg-card">
+            <CardHeader className="text-sm font-semibold">
+              데이터를 불러오지 못했어요
+            </CardHeader>
+            <CardContent className="text-sm text-muted-foreground">
+              <div className="mb-2">
+                `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` 설정을
+                확인해 주세요.
+              </div>
+              <pre className="whitespace-pre-wrap rounded-md border bg-background/50 p-3 text-xs text-foreground/80">
+                {errorMessage}
+              </pre>
+            </CardContent>
+          </Card>
+        ) : deals.length === 0 ? (
+          <NoResults />
+        ) : (
+          <>
+            <div className="hidden md:block">
+              <DealTable deals={deals} />
+            </div>
+            <div className="md:hidden overflow-hidden rounded-md border bg-card divide-y divide-border">
+              {deals.map((deal) => (
+                <DealCard key={deal.id} deal={deal} />
+              ))}
+            </div>
+          </>
+        )}
       </main>
     </div>
-  );
+  )
 }
