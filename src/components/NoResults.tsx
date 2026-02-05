@@ -9,8 +9,8 @@ type NoResultsProps = {
 }
 
 export function NoResults({
-  title = "결과가 없어요",
-  description = "필터를 줄이거나 검색어를 바꿔보세요.",
+  title = "지금은 고를 도토리가 없어요",
+  description = "필터를 조금 풀어보면 숨은 딜이 보일 수 있어요.",
   className,
 }: NoResultsProps) {
   return (

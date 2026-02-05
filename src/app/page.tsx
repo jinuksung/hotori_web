@@ -85,11 +85,11 @@ export default async function Home({
       <Header categories={categories} sources={sources} />
 
       <main className="mx-auto max-w-6xl px-4 py-6">
-        <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+        <div className="mb-4 mx-auto flex w-full max-w-[1040px] flex-wrap items-end justify-between gap-3">
           <div>
-            <h1 className="text-base font-semibold tracking-tight">핫딜 목록</h1>
+            <h1 className="text-base font-semibold tracking-tight">오늘의 도토리</h1>
             <p className="mt-1 text-xs text-muted-foreground">
-              데스크탑은 테이블, 모바일은 카드로 보여줘요.
+              과한 말 대신, 판단에 필요한 것만 정리했어요.
             </p>
           </div>
           <div className="text-xs text-muted-foreground">
@@ -102,12 +102,11 @@ export default async function Home({
         {errorMessage ? (
           <Card className="bg-card">
             <CardHeader className="text-sm font-semibold">
-              데이터를 불러오지 못했어요
+              지금은 자료를 불러오지 못했어요
             </CardHeader>
             <CardContent className="text-sm text-muted-foreground">
               <div className="mb-2">
-                `SUPABASE_URL`, `SUPABASE_ANON_KEY` 설정을
-                확인해 주세요.
+                잠시 후 다시 확인해 주세요.
               </div>
               <pre className="whitespace-pre-wrap rounded-md border bg-background/50 p-3 text-xs text-foreground/80">
                 {errorMessage}

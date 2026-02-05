@@ -12,7 +12,20 @@ const FALLBACK_THUMB = "/images/noImage.svg"
 function formatDate(value: string) {
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return value
-  return format(date, "yyyy-MM-dd HH:mm")
+  const parts = new Intl.DateTimeFormat("ko-KR", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(date)
+
+  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? ""
+  return `${get("year")}-${get("month")}-${get("day")} ${get("hour")}:${get(
+    "minute"
+  )}`
 }
 
 function formatPrice(value: string | number | null | undefined) {
@@ -76,7 +89,7 @@ export function DealCard({ deal }: DealCardProps) {
 
         <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[11px] text-muted-foreground">
           {formatPrice(deal.price) ? (
-            <span className="text-[12px] font-semibold text-brand-accent">
+            <span className="text-[13px] font-semibold text-brand-accent relative -top-[1px]">
               {formatPrice(deal.price)}
             </span>
           ) : null}

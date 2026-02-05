@@ -103,19 +103,19 @@ export function Filters({ categories, sources, className }: FiltersProps) {
   }
 
   return (
-    <div className={cn("flex flex-wrap items-center gap-2 text-xs", className)}>
-      <div className="relative w-full md:w-[280px]">
+    <div className={cn("mx-auto flex w-full max-w-[1040px] flex-wrap items-center gap-2 text-xs", className)}>
+      <div className="relative w-full md:w-[240px]">
         <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground/70" />
         <Input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="제목 검색 (부분 일치)"
+          placeholder="딜 제목 검색"
           className="h-8 bg-background/80 pl-8 text-xs"
         />
       </div>
 
       <Select value={sort} onValueChange={(v) => update({ sort: v as DealSortKey })}>
-        <SelectTrigger className="h-8 w-full bg-background/80 text-xs md:w-[160px]">
+        <SelectTrigger className="h-8 w-full bg-background/80 text-xs md:w-[140px]">
           <SelectValue placeholder="정렬" />
         </SelectTrigger>
         <SelectContent>
@@ -127,11 +127,11 @@ export function Filters({ categories, sources, className }: FiltersProps) {
       </Select>
 
       <Select value={source} onValueChange={(v) => update({ source: v })}>
-        <SelectTrigger className="h-8 w-full bg-background/80 text-xs md:w-[150px]">
+        <SelectTrigger className="h-8 w-full bg-background/80 text-xs md:w-[130px]">
           <SelectValue placeholder="Source" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">전체 소스</SelectItem>
+          <SelectItem value="all">전체 출처</SelectItem>
           {sources.map((s) => (
             <SelectItem key={s} value={s}>
               {s}
@@ -145,7 +145,7 @@ export function Filters({ categories, sources, className }: FiltersProps) {
           <Button
             type="button"
             variant="outline"
-            className="h-8 w-full justify-between bg-background/80 text-xs font-normal md:w-[220px]"
+            className="h-8 w-full justify-between bg-background/80 text-xs font-normal md:w-[180px]"
           >
             <span className="truncate">
               {selectedCategoryIds.length === 0
@@ -203,7 +203,7 @@ export function Filters({ categories, sources, className }: FiltersProps) {
           checked={soldOut}
           onCheckedChange={(checked) => update({ soldOut: Boolean(checked) })}
         />
-        <span>Sold out 제외</span>
+        <span>품절 제외</span>
       </label>
 
       <Button
@@ -214,7 +214,7 @@ export function Filters({ categories, sources, className }: FiltersProps) {
         onClick={clear}
         disabled={isPending && query.length === 0 && !searchParams.toString()}
       >
-        Reset
+        초기화
       </Button>
 
       {isPending ? (

@@ -26,10 +26,22 @@ import type { DealListItem } from "@/types/hotori";
 const FALLBACK_THUMB = "/images/noImage.svg";
 
 function formatDate(value: string) {
-  // Supabase timestamptz -> ISO string.
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return format(date, "yyyy-MM-dd HH:mm");
+  const parts = new Intl.DateTimeFormat("ko-KR", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(date);
+
+  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? "";
+  return `${get("year")}-${get("month")}-${get("day")} ${get("hour")}:${get(
+    "minute"
+  )}`;
 }
 
 function formatPrice(value: string | number | null | undefined) {
@@ -53,7 +65,7 @@ type DealTableProps = {
 
 export function DealTable({ deals }: DealTableProps) {
   return (
-    <div className="overflow-hidden rounded-md border border-border bg-card">
+    <div className="mx-auto w-full max-w-[1040px] overflow-hidden rounded-md border border-border bg-card">
       <Table className="w-full table-fixed text-xs">
         <TableCaption className="sr-only">Hotori deals table</TableCaption>
         <TableHeader className="bg-muted/60">
@@ -61,7 +73,7 @@ export function DealTable({ deals }: DealTableProps) {
             <TableHead className="w-[72px] px-2 text-center text-[11px] font-medium text-muted-foreground">
               Thumb
             </TableHead>
-            <TableHead className="px-2 text-center text-[11px] font-medium text-muted-foreground">
+            <TableHead className="w-[420px] px-2 text-center text-[11px] font-medium text-muted-foreground">
               Deal
             </TableHead>
             <TableHead className="w-[104px] px-2 text-center text-[11px] font-medium text-muted-foreground">
@@ -70,10 +82,10 @@ export function DealTable({ deals }: DealTableProps) {
             <TableHead className="w-[92px] px-2 text-center text-[11px] font-medium text-muted-foreground">
               Source
             </TableHead>
-            <TableHead className="w-[160px] px-2 text-center text-[11px] font-medium text-muted-foreground">
+            <TableHead className="w-[120px] px-2 text-center text-[11px] font-medium text-muted-foreground">
               Metrics
             </TableHead>
-            <TableHead className="w-[150px] px-2 text-center text-[11px] font-medium text-muted-foreground">
+            <TableHead className="w-[140px] px-2 text-center text-[11px] font-medium text-muted-foreground">
               Actions
             </TableHead>
           </TableRow>
@@ -125,13 +137,18 @@ export function DealTable({ deals }: DealTableProps) {
                     </div>
 
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
-                      {deal.shop_name ? (
-                        <span className="text-foreground/80">
-                          {deal.shop_name}
-                        </span>
-                      ) : null}
+                      <span
+                        className={cn(
+                          "min-w-[88px]",
+                          deal.shop_name
+                            ? "font-semibold text-foreground/80"
+                            : "text-muted-foreground"
+                        )}
+                      >
+                        {deal.shop_name ?? "정보없음"}
+                      </span>
                       {formatPrice(deal.price) ? (
-                        <span className="text-[12px] font-semibold text-brand-accent">
+                        <span className="text-[13px] font-semibold text-brand-accent relative -top-[1px]">
                           {formatPrice(deal.price)}
                         </span>
                       ) : null}
@@ -165,9 +182,9 @@ export function DealTable({ deals }: DealTableProps) {
                     <span className="text-sm text-muted-foreground">-</span>
                   )}
                 </TableCell>
-                <TableCell className="px-2 py-2.5 text-center whitespace-normal">
-                  <div className="flex flex-col items-center gap-1 text-[11px]">
-                    <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-muted-foreground">
+                <TableCell className="px-2 py-2.5 text-left whitespace-normal">
+                  <div className="flex flex-col items-start gap-1 text-[11px]">
+                    <div className="flex flex-col items-start gap-1 text-muted-foreground">
                       <span className="inline-flex items-center gap-1">
                         <Eye className="h-3.5 w-3.5" />
                         <span className="tabular-nums">

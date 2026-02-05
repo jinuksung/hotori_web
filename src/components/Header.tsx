@@ -32,9 +32,9 @@ export function Header({ categories, sources, className }: HeaderProps) {
           </Link>
           <div className="hidden items-center gap-2 text-[11px] text-white/60 md:flex">
             <span className="rounded-full border border-white/10 bg-white/10 px-2.5 py-1">
-              Read-only
+              읽기 전용
             </span>
-            <span>Supabase Live</span>
+            <span>데이터 연결됨</span>
           </div>
         </div>
       </div>
