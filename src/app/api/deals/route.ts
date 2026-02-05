@@ -12,15 +12,18 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
 
+    const rawCategoryIds = searchParams.get("categoryIds")
+    const categoryIds = rawCategoryIds
+      ? rawCategoryIds
+          .split(",")
+          .map((value) => Number(value))
+          .filter((value) => Number.isFinite(value))
+      : []
+
     const filters: DealListFilters = {
       query: searchParams.get("q") ?? undefined,
       source: searchParams.get("source") ?? undefined,
-      categoryId: (() => {
-        const raw = searchParams.get("categoryId")
-        if (!raw) return undefined
-        const parsed = Number(raw)
-        return Number.isFinite(parsed) ? parsed : undefined
-      })(),
+      categoryIds: categoryIds.length > 0 ? categoryIds : undefined,
       soldOut: (() => {
         const raw = searchParams.get("soldOut")
         if (!raw) return undefined

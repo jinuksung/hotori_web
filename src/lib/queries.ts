@@ -91,8 +91,8 @@ export async function listDeals(filters: DealListFilters): Promise<DealListItem[
     query = query.ilike("title", `%${filters.query}%`)
   }
 
-  if (filters.categoryId) {
-    query = query.eq("category_id", filters.categoryId)
+  if (filters.categoryIds && filters.categoryIds.length > 0) {
+    query = query.in("category_id", filters.categoryIds)
   }
 
   if (typeof filters.soldOut === "boolean") {

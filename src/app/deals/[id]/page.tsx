@@ -27,6 +27,16 @@ function formatDate(value: string) {
   return format(date, "yyyy-MM-dd HH:mm")
 }
 
+function formatPrice(value: string | number | null | undefined) {
+  if (value === null || value === undefined) return null
+  const num =
+    typeof value === "number"
+      ? value
+      : Number.parseFloat(String(value).replace(/[^\d.]/g, ""))
+  if (!Number.isFinite(num)) return null
+  return new Intl.NumberFormat("ko-KR").format(num)
+}
+
 function formatNumber(value: number | null | undefined) {
   if (value === null || value === undefined) return "-"
   return value.toLocaleString()
@@ -95,7 +105,7 @@ export default async function DealDetailPage({
                 {deal.shop_name ? (
                   <span className="text-foreground/80">{deal.shop_name}</span>
                 ) : null}
-                {deal.price ? <span>{String(deal.price)}</span> : null}
+                {formatPrice(deal.price) ? <span>{formatPrice(deal.price)}</span> : null}
                 <span>{deal.shipping_type}</span>
                 <span className="opacity-70">{formatDate(deal.created_at)}</span>
               </div>
@@ -105,7 +115,8 @@ export default async function DealDetailPage({
                 src={thumb}
                 alt={deal.title}
                 soldOut={deal.sold_out}
-                className="h-[320px] w-full"
+                fit="contain"
+                className="h-[320px] w-full bg-background"
               />
 
               <div className="grid gap-2">

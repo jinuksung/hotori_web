@@ -32,6 +32,16 @@ function formatDate(value: string) {
   return format(date, "yyyy-MM-dd HH:mm");
 }
 
+function formatPrice(value: string | number | null | undefined) {
+  if (value === null || value === undefined) return null;
+  const num =
+    typeof value === "number"
+      ? value
+      : Number.parseFloat(String(value).replace(/[^\d.]/g, ""));
+  if (!Number.isFinite(num)) return null;
+  return new Intl.NumberFormat("ko-KR").format(num);
+}
+
 function formatNumber(value: number | null | undefined) {
   if (value === null || value === undefined) return "-";
   return value.toLocaleString();
@@ -48,22 +58,22 @@ export function DealTable({ deals }: DealTableProps) {
         <TableCaption className="sr-only">Hotori deals table</TableCaption>
         <TableHeader className="bg-muted/60">
           <TableRow className="hover:bg-transparent">
-            <TableHead className="w-[72px] px-2 text-[11px] font-medium text-muted-foreground">
+            <TableHead className="w-[72px] px-2 text-center text-[11px] font-medium text-muted-foreground">
               Thumb
             </TableHead>
-            <TableHead className="px-2 text-[11px] font-medium text-muted-foreground">
+            <TableHead className="px-2 text-center text-[11px] font-medium text-muted-foreground">
               Deal
             </TableHead>
-            <TableHead className="w-[104px] px-2 text-[11px] font-medium text-muted-foreground">
+            <TableHead className="w-[104px] px-2 text-center text-[11px] font-medium text-muted-foreground">
               Category
             </TableHead>
-            <TableHead className="w-[92px] px-2 text-[11px] font-medium text-muted-foreground">
+            <TableHead className="w-[92px] px-2 text-center text-[11px] font-medium text-muted-foreground">
               Source
             </TableHead>
-            <TableHead className="w-[160px] px-2 text-right text-[11px] font-medium text-muted-foreground">
+            <TableHead className="w-[160px] px-2 text-center text-[11px] font-medium text-muted-foreground">
               Metrics
             </TableHead>
-            <TableHead className="w-[150px] px-2 text-right text-[11px] font-medium text-muted-foreground">
+            <TableHead className="w-[150px] px-2 text-center text-[11px] font-medium text-muted-foreground">
               Actions
             </TableHead>
           </TableRow>
@@ -85,7 +95,7 @@ export function DealTable({ deals }: DealTableProps) {
                   deal.sold_out && "bg-muted/30 opacity-70",
                 )}
               >
-                <TableCell className="px-2 py-2.5">
+                <TableCell className="px-2 py-2.5 text-center">
                   <DealThumbnail
                     src={thumb}
                     alt={deal.title}
@@ -93,7 +103,7 @@ export function DealTable({ deals }: DealTableProps) {
                     className="h-[52px] w-[64px]"
                   />
                 </TableCell>
-                <TableCell className="px-2 py-2.5 align-top whitespace-normal">
+                <TableCell className="px-2 py-2.5 align-top whitespace-normal text-left">
                   <div className="flex flex-col gap-1.5">
                     <div className="flex items-start gap-2">
                       {isHot ? (
@@ -120,9 +130,9 @@ export function DealTable({ deals }: DealTableProps) {
                           {deal.shop_name}
                         </span>
                       ) : null}
-                      {deal.price ? (
+                      {formatPrice(deal.price) ? (
                         <span className="text-[12px] font-semibold text-brand-accent">
-                          {String(deal.price)}
+                          {formatPrice(deal.price)}
                         </span>
                       ) : null}
                       <span>{deal.shipping_type}</span>
@@ -132,7 +142,7 @@ export function DealTable({ deals }: DealTableProps) {
                     </div>
                   </div>
                 </TableCell>
-                <TableCell className="px-2 py-2.5">
+                <TableCell className="px-2 py-2.5 text-center">
                   <Badge
                     variant="secondary"
                     className="bg-badge-bg text-[10px] text-badge-fg"
@@ -140,9 +150,9 @@ export function DealTable({ deals }: DealTableProps) {
                     {deal.category_name}
                   </Badge>
                 </TableCell>
-                <TableCell className="px-2 py-2.5">
+                <TableCell className="px-2 py-2.5 text-center">
                   {source ? (
-                    <div className="flex flex-col gap-1">
+                    <div className="flex flex-col items-center gap-1">
                       <Badge
                         variant="secondary"
                         className="w-fit bg-muted text-[10px] text-muted-foreground"
@@ -155,9 +165,9 @@ export function DealTable({ deals }: DealTableProps) {
                     <span className="text-sm text-muted-foreground">-</span>
                   )}
                 </TableCell>
-                <TableCell className="px-2 py-2.5 text-right whitespace-normal">
-                  <div className="flex flex-col items-end gap-1 text-[11px]">
-                    <div className="flex flex-wrap items-center justify-end gap-x-2 gap-y-1 text-muted-foreground">
+                <TableCell className="px-2 py-2.5 text-center whitespace-normal">
+                  <div className="flex flex-col items-center gap-1 text-[11px]">
+                    <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-muted-foreground">
                       <span className="inline-flex items-center gap-1">
                         <Eye className="h-3.5 w-3.5" />
                         <span className="tabular-nums">
@@ -179,13 +189,13 @@ export function DealTable({ deals }: DealTableProps) {
                     </div>
                     {deal.metrics?.captured_at ? (
                       <div className="text-[10px] text-muted-foreground/80">
-                        as of {formatDate(deal.metrics.captured_at)}
+                        {/* as of {formatDate(deal.metrics.captured_at)} */}
                       </div>
                     ) : null}
                   </div>
                 </TableCell>
-                <TableCell className="px-2 py-2.5 text-right whitespace-normal">
-                  <div className="inline-flex flex-wrap justify-end gap-2">
+                <TableCell className="px-2 py-2.5 text-center whitespace-normal">
+                  <div className="inline-flex flex-wrap justify-center gap-2">
                     <Button
                       asChild
                       size="xs"

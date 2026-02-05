@@ -2,12 +2,13 @@
 
 import * as React from "react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { Search } from "lucide-react"
+import { Search, ChevronDown } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import type { Category, DealSortKey } from "@/types/hotori"
 
@@ -58,17 +59,32 @@ export function Filters({ categories, sources, className }: FiltersProps) {
 
   const sort = (searchParams.get("sort") as DealSortKey | null) ?? "latest"
   const source = searchParams.get("source") ?? "all"
-  const categoryId = searchParams.get("categoryId") ?? "all"
+  const categoryIdsParam = searchParams.get("categoryIds") ?? ""
+  const selectedCategoryIds = categoryIdsParam
+    .split(",")
+    .map((value) => Number(value))
+    .filter((value) => Number.isFinite(value))
   const soldOut = searchParams.get("soldOut") === "1"
 
   function update(
-    next: Partial<{ sort: DealSortKey; source: string; categoryId: string; soldOut: boolean }>
+    next: Partial<{
+      sort: DealSortKey
+      source: string
+      categoryIds: number[]
+      soldOut: boolean
+    }>
   ) {
     const params = new URLSearchParams(paramsString)
 
     if (next.sort) setOrDelete(params, "sort", next.sort === "latest" ? null : next.sort)
     if (typeof next.source === "string") setOrDelete(params, "source", next.source === "all" ? null : next.source)
-    if (typeof next.categoryId === "string") setOrDelete(params, "categoryId", next.categoryId === "all" ? null : next.categoryId)
+    if (Array.isArray(next.categoryIds)) {
+      if (next.categoryIds.length === 0) {
+        params.delete("categoryIds")
+      } else {
+        params.set("categoryIds", next.categoryIds.join(","))
+      }
+    }
     if (typeof next.soldOut === "boolean") setOrDelete(params, "soldOut", next.soldOut ? "1" : null)
 
     const nextParams = params.toString()
@@ -99,7 +115,7 @@ export function Filters({ categories, sources, className }: FiltersProps) {
       </div>
 
       <Select value={sort} onValueChange={(v) => update({ sort: v as DealSortKey })}>
-      <SelectTrigger className="h-8 w-full bg-background/80 text-xs md:w-[160px]">
+        <SelectTrigger className="h-8 w-full bg-background/80 text-xs md:w-[160px]">
           <SelectValue placeholder="정렬" />
         </SelectTrigger>
         <SelectContent>
@@ -111,7 +127,7 @@ export function Filters({ categories, sources, className }: FiltersProps) {
       </Select>
 
       <Select value={source} onValueChange={(v) => update({ source: v })}>
-      <SelectTrigger className="h-8 w-full bg-background/80 text-xs md:w-[150px]">
+        <SelectTrigger className="h-8 w-full bg-background/80 text-xs md:w-[150px]">
           <SelectValue placeholder="Source" />
         </SelectTrigger>
         <SelectContent>
@@ -124,19 +140,63 @@ export function Filters({ categories, sources, className }: FiltersProps) {
         </SelectContent>
       </Select>
 
-      <Select value={categoryId} onValueChange={(v) => update({ categoryId: v })}>
-      <SelectTrigger className="h-8 w-full bg-background/80 text-xs md:w-[190px]">
-          <SelectValue placeholder="Category" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">전체 카테고리</SelectItem>
-          {categories.map((c) => (
-            <SelectItem key={c.id} value={String(c.id)}>
-              {c.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button
+            type="button"
+            variant="outline"
+            className="h-8 w-full justify-between bg-background/80 text-xs font-normal md:w-[220px]"
+          >
+            <span className="truncate">
+              {selectedCategoryIds.length === 0
+                ? "전체 카테고리"
+                : (() => {
+                    const selected = categories.filter((c) =>
+                      selectedCategoryIds.includes(c.id)
+                    )
+                    if (selected.length === 0) return "전체 카테고리"
+                    if (selected.length === 1) return selected[0]?.name ?? "전체 카테고리"
+                    return `${selected[0]?.name ?? "카테고리"} 외 ${selected.length - 1}`
+                  })()}
+            </span>
+            <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent align="start" className="w-[220px] p-2">
+          <div className="flex flex-col gap-1">
+            <button
+              type="button"
+              className="flex items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs hover:bg-muted"
+              onClick={() => update({ categoryIds: [] })}
+            >
+              <Checkbox checked={selectedCategoryIds.length === 0} />
+              <span>ALL</span>
+            </button>
+            <div className="h-px bg-border" />
+            <div className="max-h-64 overflow-auto">
+              {categories.map((c) => {
+                const checked = selectedCategoryIds.includes(c.id)
+                return (
+                  <button
+                    key={c.id}
+                    type="button"
+                    className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs hover:bg-muted"
+                    onClick={() => {
+                      const nextIds = checked
+                        ? selectedCategoryIds.filter((id) => id !== c.id)
+                        : [...selectedCategoryIds, c.id]
+                      update({ categoryIds: nextIds })
+                    }}
+                  >
+                    <Checkbox checked={checked} />
+                    <span>{c.name}</span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        </PopoverContent>
+      </Popover>
 
       <label className="inline-flex select-none items-center gap-2 rounded-md border bg-muted/40 px-2.5 py-1.5 text-xs">
         <Checkbox

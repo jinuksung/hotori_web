@@ -39,13 +39,13 @@ export default async function Home({
   const queryParams = new URLSearchParams()
   const query = getString(resolvedSearchParams, "q")
   const source = getString(resolvedSearchParams, "source")
-  const categoryId = getString(resolvedSearchParams, "categoryId")
+  const categoryIds = getString(resolvedSearchParams, "categoryIds")
   const soldOut = getString(resolvedSearchParams, "soldOut")
   const sort = parseSort(getString(resolvedSearchParams, "sort"))
 
   if (query) queryParams.set("q", query)
   if (source) queryParams.set("source", source)
-  if (categoryId) queryParams.set("categoryId", categoryId)
+  if (categoryIds) queryParams.set("categoryIds", categoryIds)
   if (soldOut) queryParams.set("soldOut", soldOut)
   if (sort && sort !== "latest") queryParams.set("sort", sort)
 

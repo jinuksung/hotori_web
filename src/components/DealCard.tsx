@@ -15,6 +15,16 @@ function formatDate(value: string) {
   return format(date, "yyyy-MM-dd HH:mm")
 }
 
+function formatPrice(value: string | number | null | undefined) {
+  if (value === null || value === undefined) return null
+  const num =
+    typeof value === "number"
+      ? value
+      : Number.parseFloat(String(value).replace(/[^\d.]/g, ""))
+  if (!Number.isFinite(num)) return null
+  return new Intl.NumberFormat("ko-KR").format(num)
+}
+
 function formatNumber(value: number | null | undefined) {
   if (value === null || value === undefined) return "-"
   return value.toLocaleString()
@@ -65,9 +75,9 @@ export function DealCard({ deal }: DealCardProps) {
         </div>
 
         <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[11px] text-muted-foreground">
-          {deal.price ? (
+          {formatPrice(deal.price) ? (
             <span className="text-[12px] font-semibold text-brand-accent">
-              {String(deal.price)}
+              {formatPrice(deal.price)}
             </span>
           ) : null}
           {deal.shipping_type ? <span>{deal.shipping_type}</span> : null}

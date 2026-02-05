@@ -5,7 +5,7 @@ export type ShippingType = "FREE" | "PAID" | "UNKNOWN" | string
 export type DealListFilters = {
   query?: string
   source?: string
-  categoryId?: number
+  categoryIds?: number[]
   soldOut?: boolean
   sort?: DealSortKey
 }
@@ -69,4 +69,3 @@ export type Category = {
   id: number
   name: string
 }
-

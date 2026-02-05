@@ -10,6 +10,7 @@ type DealThumbnailProps = {
   soldOut: boolean
   className?: string
   fallbackSrc?: string
+  fit?: "cover" | "contain"
 }
 
 function normalizeSrc(src: string, fallback: string) {
@@ -26,6 +27,7 @@ export function DealThumbnail({
   soldOut,
   className,
   fallbackSrc = "/images/noImage.svg",
+  fit = "cover",
 }: DealThumbnailProps) {
   const [currentSrc, setCurrentSrc] = React.useState(() =>
     normalizeSrc(src, fallbackSrc)
@@ -48,7 +50,8 @@ export function DealThumbnail({
         src={currentSrc}
         alt={alt}
         className={cn(
-          "h-full w-full object-cover",
+          "h-full w-full",
+          fit === "contain" ? "object-contain" : "object-cover",
           soldOut ? "scale-[1.02] saturate-50" : "saturate-110"
         )}
         loading="lazy"
