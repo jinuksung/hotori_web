@@ -84,6 +84,7 @@ export default async function DealDetailPage({
   const primarySource = deal.sources[0] ?? null
   const thumb = deal.thumbnail_url ?? primarySource?.thumb_url ?? FALLBACK_THUMB
   const bestBuy = deal.links.find((l) => l.is_affiliate) ?? deal.links[0] ?? null
+  const hasBuyLink = Boolean(bestBuy?.url)
 
   return (
     <div className="min-h-dvh">
@@ -135,30 +136,27 @@ export default async function DealDetailPage({
               <div className="grid gap-2">
                 <div className="text-sm font-semibold">링크</div>
                 <div className="flex flex-col gap-2">
-                  <Button
-                    asChild
-                    className={
-                      bestBuy
-                        ? "bg-brand-accent text-white hover:bg-brand-accent-hover"
-                        : "bg-muted text-muted-foreground"
-                    }
-                    disabled={!bestBuy}
-                  >
-                    <a
-                      href={bestBuy?.url ?? "#"}
-                      target="_blank"
-                      rel="noreferrer"
-                      aria-disabled={!bestBuy}
+                  {hasBuyLink ? (
+                    <Button
+                      asChild
+                      className="bg-brand-accent text-white hover:bg-brand-accent-hover"
                     >
+                      <a href={bestBuy?.url} target="_blank" rel="noreferrer">
+                        <ShoppingBag className="mr-2 h-4 w-4" />
+                        Buy
+                        {bestBuy?.domain ? (
+                          <span className="ml-2 text-xs text-muted-foreground">
+                            {bestBuy.domain}
+                          </span>
+                        ) : null}
+                      </a>
+                    </Button>
+                  ) : (
+                    <Button disabled className="bg-muted text-muted-foreground">
                       <ShoppingBag className="mr-2 h-4 w-4" />
                       Buy
-                      {bestBuy?.domain ? (
-                        <span className="ml-2 text-xs text-muted-foreground">
-                          {bestBuy.domain}
-                        </span>
-                      ) : null}
-                    </a>
-                  </Button>
+                    </Button>
+                  )}
 
                   <Button
                     asChild
